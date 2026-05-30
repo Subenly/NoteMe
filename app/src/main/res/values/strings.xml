@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">NoteMe</string>
+    <string name="good_morning_user">Good Morning, User</string>
+    <string name="let_s_make_today_productive">Let\'s make today productive.</string>
+    <string name="today_s_reminders">Today\'s Reminders</string>
+    <string name="view_all">VIEW ALL</string>
+    <string name="recent_notes">Recent Notes</string>
+</resources>
