@@ -8,54 +8,75 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import com.example.noteme.R
+import com.example.noteme.ui.fragment.CalendarFragment
 import com.example.noteme.ui.fragment.HomeFragment
+import com.example.noteme.ui.fragment.NotesFragment
+import com.example.noteme.ui.fragment.ProfileFragment
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
+        // Mengatur padding agar konten tidak tertutup oleh navigasi sistem bawaan HP
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // Memanggil fungsi untuk mengatur tampilan menu bawah
+        // 1. Siapkan menu navigasi bawah beserta logika kliknya
         setupBottomNavigation()
 
-        // --- TAMBAHKAN KODE INI ---
-        // Memuat HomeFragment sebagai halaman pertama jika aplikasi baru pertama kali dibuka
+        // 2. Tampilkan HomeFragment pertama kali saat aplikasi baru dibuka
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
-                .commit()
+            loadFragment(HomeFragment())
         }
     }
 
+    // Fungsi untuk mengganti isi halaman di area fragment_container
+    private fun loadFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
+    }
+
+    // Fungsi untuk mengatur ikon, teks, dan aksi klik pada Custom Bottom Navigation
     private fun setupBottomNavigation() {
-        // 1. Setup Menu Home
+        // -- Menu Home --
         val menuHome = findViewById<View>(R.id.menuHome)
         menuHome.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_home)
         menuHome.findViewById<TextView>(R.id.textMenu).text = "Home"
+        menuHome.setOnClickListener {
+            loadFragment(HomeFragment())
+        }
 
-        // 2. Setup Menu Notes
+        // -- Menu Notes --
         val menuNotes = findViewById<View>(R.id.menuNotes)
-        menuNotes.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_notes) // Ganti dengan nama ikon notes Anda
+        menuNotes.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_notes) // Pastikan Anda punya ic_notes
         menuNotes.findViewById<TextView>(R.id.textMenu).text = "Notes"
+        menuNotes.setOnClickListener {
+            loadFragment(NotesFragment())
+        }
 
-        // 3. Setup Menu Calendar
+        // -- Menu Calendar --
         val menuCalendar = findViewById<View>(R.id.menuCalendar)
-        menuCalendar.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_profile) // Ganti dengan nama ikon calendar Anda
+        menuCalendar.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_profile) // Pastikan Anda punya ic_calendar
         menuCalendar.findViewById<TextView>(R.id.textMenu).text = "Calendar"
+        menuCalendar.setOnClickListener {
 
-        // 4. Setup Menu Profile
+        }
+
+        // -- Menu Profile --
         val menuProfile = findViewById<View>(R.id.menuProfile)
-        menuProfile.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_profile) // Ganti dengan nama ikon profile Anda
+        menuProfile.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_profile) // Pastikan Anda punya ic_profile
         menuProfile.findViewById<TextView>(R.id.textMenu).text = "Profile"
+        menuProfile.setOnClickListener {
 
-        // Catatan: Logika klik (setOnClickListener) untuk mengganti halaman akan kita tambahkan setelah ini.
+        }
     }
 }
