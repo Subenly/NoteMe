@@ -4,8 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:layout_height="match_parent">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
@@ -20,17 +19,16 @@
         android:id="@+id/menuBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginHorizontal="12dp"
         android:background="@drawable/bg_menu"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
         android:paddingHorizontal="12dp"
         android:paddingVertical="10dp"
-        android:clipToPadding="false"
-        android:layout_marginBottom="20dp"
-        android:layout_marginHorizontal="12dp"
         android:weightSum="4"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <include
             android:id="@+id/menuHome"

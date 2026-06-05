@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingVertical="8dp">
+
+    <LinearLayout
+        android:id="@+id/bg_date_selector"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:background="@drawable/bg_circle"> <TextView
+        android:id="@+id/tv_date_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="11"
+        android:textColor="#212121"
+        android:textSize="14sp" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/dot_event_indicator"
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/bg_circle"
+        android:backgroundTint="@color/magenta_noteme"
+        android:visibility="invisible" /> </LinearLayout>

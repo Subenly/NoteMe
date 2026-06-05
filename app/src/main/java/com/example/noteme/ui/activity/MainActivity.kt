@@ -65,10 +65,10 @@ class MainActivity : AppCompatActivity() {
 
         // -- Menu Calendar --
         val menuCalendar = findViewById<View>(R.id.menuCalendar)
-        menuCalendar.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_profile) // Pastikan Anda punya ic_calendar
+        menuCalendar.findViewById<ImageView>(R.id.iconMenu).setImageResource(R.drawable.ic_calendar) // Pastikan Anda punya ic_calendar
         menuCalendar.findViewById<TextView>(R.id.textMenu).text = "Calendar"
         menuCalendar.setOnClickListener {
-
+            loadFragment(CalendarFragment())
         }
 
         // -- Menu Profile --
