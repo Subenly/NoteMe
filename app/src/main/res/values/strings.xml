@@ -5,4 +5,53 @@
     <string name="today_s_reminders">Today\'s Reminders</string>
     <string name="view_all">VIEW ALL</string>
     <string name="recent_notes">Recent Notes</string>
+
+    <!-- Profile Strings -->
+    <string name="profile">Profile</string>
+    <string name="user_name">User</string>
+    <string name="user_email">user@noteme.app</string>
+    <string name="notes_count">128</string>
+    <string name="notes_label">Notes</string>
+    <string name="journals_count">12</string>
+    <string name="journals_label">Journals</string>
+    <string name="tags_count">42</string>
+    <string name="tags_label">Tags</string>
+
+    <string name="section_account">ACCOUNT</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="security">Security</string>
+    <string name="backup_sync">Backup &amp; Sync</string>
+
+    <string name="section_preferences">PREFERENCES</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="theme_customization">Theme Customization</string>
+    <string name="notifications">Notifications</string>
+
+    <string name="section_support">SUPPORT</string>
+    <string name="help_center">Help Center</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="about_noteme">About NoteMe</string>
+
+    <string name="logout">Logout</string>
+    <string name="app_version">Version 2.4.1 (Build 82)</string>
+
+    <!-- Personal Info Strings -->
+    <string name="display_name">Display Name</string>
+    <string name="email_address">Email Address</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="gender">Gender</string>
+    <string name="save">Save</string>
+    <string name="personal_info_desc">Update your personal details to keep your account current.</string>
+    <string name="back">Back</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="gender_other">Other</string>
+    <string name="info_saved">Information Saved!</string>
+
+    <!-- Dialog Strings -->
+    <string name="logout_confirm_title">Logout</string>
+    <string name="logout_confirm_msg">Are you sure you want to logout?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>
