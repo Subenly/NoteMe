@@ -20,7 +20,7 @@ class PersonalInfoFragment : Fragment() {
     private lateinit var etDisplayName: TextInputEditText
     private lateinit var etEmail: TextInputEditText
     private lateinit var etPhone: TextInputEditText
-    private lateinit var etDOB: TextInputEditText
+    private lateinit var etDateOfBirth: TextInputEditText
     private lateinit var actvGender: AutoCompleteTextView
 
     override fun onCreateView(
@@ -37,7 +37,7 @@ class PersonalInfoFragment : Fragment() {
         etDisplayName = view.findViewById(R.id.etDisplayName)
         etEmail = view.findViewById(R.id.etEmail)
         etPhone = view.findViewById(R.id.etPhone)
-        etDOB = view.findViewById(R.id.etDOB)
+        etDateOfBirth = view.findViewById(R.id.etDateOfBirth)
         actvGender = view.findViewById(R.id.actvGender)
 
         setupGenderDropdown()
@@ -59,13 +59,13 @@ class PersonalInfoFragment : Fragment() {
     }
 
     private fun setupDatePicker() {
-        etDOB.setOnClickListener {
+        etDateOfBirth.setOnClickListener {
             val calendar = Calendar.getInstance()
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
                 { _, year, month, day ->
                     val date = "$day/${month + 1}/$year"
-                    etDOB.setText(date)
+                    etDateOfBirth.setText(date)
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -78,11 +78,10 @@ class PersonalInfoFragment : Fragment() {
     private fun loadUserData() {
         val sharedPref = requireActivity().getSharedPreferences("UserProfile", Context.MODE_PRIVATE)
         
-        // Mengisi form dengan data dari memori, atau gunakan nilai default jika kosong
-        etDisplayName.setText(sharedPref.getString("name", "User"))
-        etEmail.setText(sharedPref.getString("email", "user@noteme.app"))
+        etDisplayName.setText(sharedPref.getString("name", getString(R.string.user_name)))
+        etEmail.setText(sharedPref.getString("email", getString(R.string.user_email)))
         etPhone.setText(sharedPref.getString("phone", ""))
-        etDOB.setText(sharedPref.getString("dob", ""))
+        etDateOfBirth.setText(sharedPref.getString("dob", ""))
         
         val savedGender = sharedPref.getString("gender", "")
         if (!savedGender.isNullOrEmpty()) {
@@ -97,10 +96,10 @@ class PersonalInfoFragment : Fragment() {
         editor.putString("name", etDisplayName.text.toString())
         editor.putString("email", etEmail.text.toString())
         editor.putString("phone", etPhone.text.toString())
-        editor.putString("dob", etDOB.text.toString())
+        editor.putString("dob", etDateOfBirth.text.toString())
         editor.putString("gender", actvGender.text.toString())
         
-        editor.apply() // Data disimpan ke memori HP
+        editor.apply()
     }
 
     private fun setupClickListeners(view: View) {
@@ -109,7 +108,7 @@ class PersonalInfoFragment : Fragment() {
         }
 
         view.findViewById<MaterialButton>(R.id.btnSave).setOnClickListener {
-            saveUserData() // Panggil fungsi simpan
+            saveUserData()
             Toast.makeText(requireContext(), getString(R.string.info_saved), Toast.LENGTH_SHORT).show()
             parentFragmentManager.popBackStack()
         }

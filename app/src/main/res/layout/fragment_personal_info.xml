@@ -26,9 +26,9 @@
                 android:rotation="180"
                 app:tint="@color/magenta_noteme"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back"
                 android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="Back" />
+                android:focusable="true" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -129,7 +129,7 @@
                     android:layout_marginBottom="16dp">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etDOB"
+                        android:id="@+id/etDateOfBirth"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:focusable="false"
