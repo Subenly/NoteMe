@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Warna Semantik untuk Dark Mode -->
+    <color name="gray_icon">#B0B0B0</color>
+    <color name="bg_screen">#121212</color>
+    <color name="bg_card">#1E1E1E</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="divider_color">#333333</color>
+</resources>

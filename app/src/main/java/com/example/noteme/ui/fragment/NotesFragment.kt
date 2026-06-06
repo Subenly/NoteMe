@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,7 +42,7 @@ class NotesFragment : Fragment() {
             ),
             Note(
                 "Work",
-                R.color.gray_icon,
+                R.color.text_secondary, // Diubah dari gray_icon
                 "Yesterday",
                 "Q3 Design Sync Notes",
                 "Focus on improving the tactile feel of the mobile app. Update shadows to be softer."
@@ -57,7 +56,7 @@ class NotesFragment : Fragment() {
             ),
             Note(
                 "Study",
-                R.color.gray_icon,
+                R.color.text_secondary, // Diubah dari gray_icon
                 "Sun",
                 "Kotlin Coroutines",
                 "Need to review how suspend functions work in the background thread."
@@ -73,10 +72,9 @@ class NotesFragment : Fragment() {
         val fabAddNote: FloatingActionButton = view.findViewById(R.id.fab_add_note)
 
         fabAddNote.setOnClickListener {
-            // Menggunakan parentFragmentManager untuk berpindah halaman
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, CreateNoteFragment())
-                .addToBackStack(null) // Sangat penting! Agar tombol 'Back' di HP berfungsi mengembalikan ke layar ini.
+                .addToBackStack(null)
                 .commit()
         }
     }
