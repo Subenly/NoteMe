@@ -17,6 +17,7 @@ import com.example.noteme.ui.adapter.NoteAdapter
 import com.example.noteme.ui.adapter.ReminderAdapter
 import com.example.noteme.utils.AuthManager
 import java.util.Calendar
+import com.example.noteme.model.NoteManager
 
 class HomeFragment : Fragment() {
 
@@ -88,28 +89,16 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupNoteRecyclerView(view: View) {
-        val rvNotes: RecyclerView = view.findViewById(R.id.rv_recent_notes)
+        // UBAH ID DI SINI MENJADI rv_recent_notes
+        val rvRecentNotes: RecyclerView = view.findViewById(R.id.rv_recent_notes)
 
-        // Membuat Dummy Data untuk Catatan
-        val noteList = listOf(
-            Note(
-                "Inspiration",
-                R.color.magenta_noteme,
-                "Just now",
-                "Morning Routine Ideas",
-                "Start with 10 minutes of meditation, followed by a quick journaling session. Don't check phone until after"
-            ),
-            Note(
-                "Work",
-                R.color.gray_icon,
-                "Yesterday",
-                "Q3 Design Sync Notes",
-                "Focus on improving the tactile feel of the mobile app. Update shadows to be softer and more tinted. Review..."
-            )
-        )
+        // Pastikan ada data dummy jika aplikasi baru pertama kali dibuka
+        NoteManager.addDummyDataIfNeeded()
 
-        // Memasang Adapter dan Layout Manager Vertikal
-        rvNotes.layoutManager = LinearLayoutManager(requireContext())
-        rvNotes.adapter = NoteAdapter(noteList)
+        // Ambil data langsung dari NoteManager (yang sudah ditambah catatan baru)
+        val adapter = NoteAdapter(NoteManager.noteList)
+
+        rvRecentNotes.layoutManager = LinearLayoutManager(requireContext())
+        rvRecentNotes.adapter = adapter
     }
 }

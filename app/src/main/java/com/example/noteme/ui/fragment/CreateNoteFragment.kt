@@ -14,6 +14,8 @@ import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.example.noteme.model.NoteManager
+import com.example.noteme.model.Note
 
 class CreateNoteFragment : Fragment() {
 
@@ -31,28 +33,46 @@ class CreateNoteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Inisialisasi View
+        // Inisialisasi View dari XML Anda
         tvDate = view.findViewById(R.id.tv_date)
         tvReminder = view.findViewById(R.id.tv_reminder)
         val btnSave = view.findViewById<MaterialButton>(R.id.btn_save_entry)
 
-        // Atur teks tanggal bawaan (hari ini)
+        // Panggil EditText untuk Judul dan Isi Catatan
+        val etTitle = view.findViewById<android.widget.EditText>(R.id.et_note_title)
+        val etContent = view.findViewById<android.widget.EditText>(R.id.et_note_content)
+
         updateDateText()
 
-        // Aksi klik untuk memilih Tanggal
-        tvDate.setOnClickListener {
-            showDatePicker()
-        }
+        tvDate.setOnClickListener { showDatePicker() }
+        tvReminder.setOnClickListener { showTimePicker() }
 
-        // Aksi klik untuk memilih Waktu Reminder
-        tvReminder.setOnClickListener {
-            showTimePicker()
-        }
-
-        // Aksi Simpan Catatan
+        // --- LOGIKA MENYIMPAN CATATAN BARU ---
         btnSave.setOnClickListener {
-            Toast.makeText(requireContext(), "Catatan berhasil disimpan!", Toast.LENGTH_SHORT).show()
-            parentFragmentManager.popBackStack() // Kembali ke halaman daftar catatan
+            val titleText = etTitle.text.toString().trim()
+            val contentText = etContent.text.toString().trim()
+
+            // Cek apakah judul dan isi tidak kosong
+            if (titleText.isNotEmpty() && contentText.isNotEmpty()) {
+
+                // Buat objek catatan baru
+                val newNote = Note(
+                    category = "Personal", // Default kategori sementara
+                    categoryColorResId = R.color.magenta_noteme,
+                    time = "Today", // Nanti bisa disesuaikan dengan format jam
+                    title = titleText,
+                    preview = contentText
+                )
+
+                // Tambahkan catatan baru ke urutan paling atas (index 0) di NoteManager
+                NoteManager.noteList.add(0, newNote)
+
+                Toast.makeText(requireContext(), "Catatan berhasil disimpan!", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack() // Kembali ke halaman daftar catatan
+
+            } else {
+                Toast.makeText(requireContext(), "Judul dan isi tidak boleh kosong!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
