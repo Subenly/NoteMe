@@ -11,6 +11,7 @@ import com.example.noteme.R
 import com.example.noteme.model.Note
 import com.example.noteme.ui.adapter.NoteAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.noteme.model.NoteManager
 
 class NotesFragment : Fragment() {
 
@@ -31,41 +32,14 @@ class NotesFragment : Fragment() {
     private fun setupRecyclerView(view: View) {
         val rvAllNotes: RecyclerView = view.findViewById(R.id.rv_all_notes)
 
-        // Data dummy untuk halaman semua catatan
-        val noteList = listOf(
-            Note(
-                "Inspiration",
-                R.color.magenta_noteme,
-                "Just now",
-                "Morning Routine Ideas",
-                "Start with 10 minutes of meditation, followed by a quick journaling session."
-            ),
-            Note(
-                "Work",
-                R.color.text_secondary, // Diubah dari gray_icon
-                "Yesterday",
-                "Q3 Design Sync Notes",
-                "Focus on improving the tactile feel of the mobile app. Update shadows to be softer."
-            ),
-            Note(
-                "Personal",
-                R.color.magenta_noteme,
-                "Mon",
-                "Grocery List",
-                "Almond milk, eggs, spinach, chicken breast, and some fresh strawberries."
-            ),
-            Note(
-                "Study",
-                R.color.text_secondary, // Diubah dari gray_icon
-                "Sun",
-                "Kotlin Coroutines",
-                "Need to review how suspend functions work in the background thread."
-            )
-        )
+        // Pastikan ada data dummy jika aplikasi baru pertama kali dibuka
+        NoteManager.addDummyDataIfNeeded()
 
-        // Kita bisa langsung memanggil NoteAdapter yang sama dengan yang di Home!
+        // Ambil data langsung dari NoteManager (yang sudah ditambah catatan baru)
+        val adapter = NoteAdapter(NoteManager.noteList)
+
         rvAllNotes.layoutManager = LinearLayoutManager(requireContext())
-        rvAllNotes.adapter = NoteAdapter(noteList)
+        rvAllNotes.adapter = adapter
     }
 
     private fun setupFab(view: View) {
