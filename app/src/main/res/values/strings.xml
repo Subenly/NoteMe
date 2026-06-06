@@ -6,6 +6,11 @@
     <string name="view_all">VIEW ALL</string>
     <string name="recent_notes">Recent Notes</string>
 
+    <!-- Greeting Templates -->
+    <string name="good_morning">Good Morning, %1$s</string>
+    <string name="good_afternoon">Good Afternoon, %1$s</string>
+    <string name="good_evening">Good Evening, %1$s</string>
+
     <!-- Profile Strings -->
     <string name="profile">Profile</string>
     <string name="user_name">User</string>
@@ -48,6 +53,37 @@
     <string name="gender_female">Female</string>
     <string name="gender_other">Other</string>
     <string name="info_saved">Information Saved!</string>
+
+    <!-- Onboarding Strings -->
+    <string name="onboarding_title_1">Capture Your Thoughts</string>
+    <string name="onboarding_desc_1">Tulis ide, mimpi, dan catatan penting Anda dengan cepat dan mudah.</string>
+
+    <string name="onboarding_title_2">Never miss a moment.</string>
+    <string name="onboarding_desc_2">Atur jadwal harian Anda dan pastikan semua rencana berjalan sesuai timeline.</string>
+
+    <string name="onboarding_title_3">Stay Productive</string>
+    <string name="onboarding_desc_3">Dapatkan pengingat otomatis untuk jurnal dan tugas harian Anda.</string>
+
+    <string name="get_started">GET STARTED  →</string>
+    <string name="finish">FINISH</string>
+    <string name="skip">Skip</string>
+
+    <!-- Auth Strings -->
+    <string name="welcome_back">Welcome Back</string>
+    <string name="login_subtitle">Step back into your private sanctuary.</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="log_in">Log In  →</string>
+    <string name="dont_have_account">Don\'t have an account? </string>
+    <string name="sign_up">Sign Up</string>
+
+    <string name="create_account">Create Account</string>
+    <string name="signup_subtitle">Start your mindful productivity journey today.</string>
+    <string name="full_name">Full Name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="already_have_account">Already have an account? </string>
+    <string name="sign_in">Sign In</string>
+    <string name="register">Sign Up  →</string>
 
     <!-- Dialog Strings -->
     <string name="logout_confirm_title">Logout</string>
