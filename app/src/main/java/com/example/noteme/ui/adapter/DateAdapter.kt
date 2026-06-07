@@ -4,17 +4,21 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteme.R
 import com.example.noteme.model.DateItem
-import com.google.android.material.card.MaterialCardView
 
-class DateAdapter(private val dateList: List<DateItem>) : RecyclerView.Adapter<DateAdapter.DateViewHolder>() {
+class DateAdapter(
+    private val dateList: List<DateItem>,
+    private val onDateClickListener: (DateItem) -> Unit // Fungsi aksi klik
+) : RecyclerView.Adapter<DateAdapter.DateViewHolder>() {
 
     class DateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val cardView: MaterialCardView = itemView as MaterialCardView // Root layout adalah MaterialCardView
-        val tvDayName: TextView = itemView.findViewById(R.id.tv_day_name)
+        // Pastikan ID ini sesuai dengan elemen di file item_date.xml Anda
+        val bgSelector: LinearLayout = itemView.findViewById(R.id.bg_date_selector)
+        val tvDayOfWeek: TextView = itemView.findViewById(R.id.tv_day_of_week)
         val tvDateNumber: TextView = itemView.findViewById(R.id.tv_date_number)
     }
 
@@ -25,18 +29,25 @@ class DateAdapter(private val dateList: List<DateItem>) : RecyclerView.Adapter<D
 
     override fun onBindViewHolder(holder: DateViewHolder, position: Int) {
         val dateItem = dateList[position]
-        holder.tvDayName.text = dateItem.dayName
+        holder.tvDayOfWeek.text = dateItem.dayOfWeek
         holder.tvDateNumber.text = dateItem.dateNumber
 
-        // Mengatur tampilan saat tanggal dipilih (Active) atau tidak
-        if (dateItem.isActive) {
-            holder.cardView.setCardBackgroundColor(Color.parseColor("#D81E5B")) // Magenta NoteMe
-            holder.tvDayName.setTextColor(Color.WHITE)
+        // Mengubah warna berdasarkan status apakah tanggal ini dipilih
+        if (dateItem.isSelected) {
+            holder.bgSelector.setBackgroundResource(R.drawable.bg_circle)
+            holder.bgSelector.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#D81E5B")) // Warna Magenta
+            holder.tvDayOfWeek.setTextColor(Color.WHITE)
             holder.tvDateNumber.setTextColor(Color.WHITE)
         } else {
-            holder.cardView.setCardBackgroundColor(Color.WHITE)
-            holder.tvDayName.setTextColor(Color.parseColor("#757575")) // Abu-abu
+            holder.bgSelector.setBackgroundResource(R.drawable.bg_circle)
+            holder.bgSelector.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.WHITE) // Warna Putih
+            holder.tvDayOfWeek.setTextColor(Color.parseColor("#9E9E9E")) // Abu-abu
             holder.tvDateNumber.setTextColor(Color.parseColor("#212121")) // Hitam
+        }
+
+        // Tangkap event klik
+        holder.itemView.setOnClickListener {
+            onDateClickListener(dateItem)
         }
     }
 
