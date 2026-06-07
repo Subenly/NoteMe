@@ -48,27 +48,33 @@ class CreateNoteFragment : Fragment() {
         tvReminder.setOnClickListener { showTimePicker() }
 
         // --- LOGIKA MENYIMPAN CATATAN BARU ---
+        // --- LOGIKA MENYIMPAN CATATAN BARU ---
         btnSave.setOnClickListener {
             val titleText = etTitle.text.toString().trim()
             val contentText = etContent.text.toString().trim()
 
-            // Cek apakah judul dan isi tidak kosong
             if (titleText.isNotEmpty() && contentText.isNotEmpty()) {
 
-                // Buat objek catatan baru
+                // Ambil Tanggal, Bulan, dan Tahun dari Date Picker
+                val selectedDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+                val selectedMonth = calendar.get(Calendar.MONTH)
+                val selectedYear = calendar.get(Calendar.YEAR)
+
                 val newNote = Note(
-                    category = "Personal", // Default kategori sementara
+                    category = "Personal",
                     categoryColorResId = R.color.magenta_noteme,
-                    time = "Today", // Nanti bisa disesuaikan dengan format jam
+                    time = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(calendar.time),
                     title = titleText,
-                    preview = contentText
+                    preview = contentText,
+                    dateNumber = selectedDayOfMonth,
+                    month = selectedMonth, // SIMPAN BULAN
+                    year = selectedYear    // SIMPAN TAHUN
                 )
 
-                // Tambahkan catatan baru ke urutan paling atas (index 0) di NoteManager
                 NoteManager.noteList.add(0, newNote)
 
                 Toast.makeText(requireContext(), "Catatan berhasil disimpan!", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack() // Kembali ke halaman daftar catatan
+                parentFragmentManager.popBackStack()
 
             } else {
                 Toast.makeText(requireContext(), "Judul dan isi tidak boleh kosong!", Toast.LENGTH_SHORT).show()

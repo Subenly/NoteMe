@@ -50,20 +50,26 @@
                     android:layout_centerVertical="true">
 
                     <TextView
+                        android:id="@+id/btn_prev_month"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:text="&lt;"
                         android:gravity="center"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
                         android:textColor="#757575"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
                         android:focusable="true"/>
 
                     <TextView
+                        android:id="@+id/btn_next_month"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:text="&gt;"
                         android:gravity="center"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
                         android:textColor="#757575"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
