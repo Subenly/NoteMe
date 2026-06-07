@@ -10,7 +10,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.noteme.R
 import com.example.noteme.model.CalendarDate
 
-class CalendarDateAdapter(private val dateList: List<CalendarDate>) : RecyclerView.Adapter<CalendarDateAdapter.DateViewHolder>() {
+class CalendarDateAdapter(
+    private val dateList: List<CalendarDate>,
+    private val onDateClickListener: (CalendarDate) -> Unit // Tambahkan callback klik ini
+) : RecyclerView.Adapter<CalendarDateAdapter.DateViewHolder>() {
 
     class DateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val bgSelector: LinearLayout = itemView.findViewById(R.id.bg_date_selector)
@@ -27,18 +30,21 @@ class CalendarDateAdapter(private val dateList: List<CalendarDate>) : RecyclerVi
         val dateItem = dateList[position]
         holder.tvDateNumber.text = dateItem.dateNumber
 
-        // Tampilkan titik jika ada event
         holder.dotIndicator.visibility = if (dateItem.hasEvent) View.VISIBLE else View.INVISIBLE
 
-        // Ubah warna jika tanggal dipilih (aktif)
         if (dateItem.isSelected) {
-            // Gunakan warna magenta NoteMe
             holder.bgSelector.setBackgroundColor(Color.parseColor("#D81E5B"))
             holder.tvDateNumber.setTextColor(Color.WHITE)
         } else {
-            // Transparan/putih jika tidak dipilih
             holder.bgSelector.setBackgroundColor(Color.TRANSPARENT)
             holder.tvDateNumber.setTextColor(Color.parseColor("#212121"))
+        }
+
+        // Tangkap aksi klik pada item tanggal
+        holder.itemView.setOnClickListener {
+            if (dateItem.dateNumber.isNotEmpty()) {
+                onDateClickListener(dateItem)
+            }
         }
     }
 

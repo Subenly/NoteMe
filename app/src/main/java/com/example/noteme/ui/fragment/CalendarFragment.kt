@@ -4,17 +4,35 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteme.R
 import com.example.noteme.model.CalendarDate
+import com.example.noteme.model.NoteManager
 import com.example.noteme.model.TimelineEvent
 import com.example.noteme.ui.adapter.CalendarDateAdapter
 import com.example.noteme.ui.adapter.TimelineAdapter
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class CalendarFragment : Fragment() {
+
+    private lateinit var rvCalendarGrid: RecyclerView
+    private lateinit var rvTimeline: RecyclerView
+    private lateinit var tvTimelineDate: TextView
+    private lateinit var tvMonthYear: TextView
+    private lateinit var btnPrevMonth: TextView
+    private lateinit var btnNextMonth: TextView
+
+    private val dateList = mutableListOf<CalendarDate>()
+
+    // Mengambil sistem waktu saat ini secara LIVE dari HP
+    private val currentCalendar = Calendar.getInstance()
+    private var selectedDateNumber: Int = currentCalendar.get(Calendar.DAY_OF_MONTH)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,60 +44,118 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupCalendarGrid(view)
-        setupTimeline(view)
+        // Inisialisasi komponen tampilan
+        rvCalendarGrid = view.findViewById(R.id.rv_calendar_grid)
+        rvTimeline = view.findViewById(R.id.rv_timeline)
+        tvTimelineDate = view.findViewById(R.id.tv_timeline_date)
+        tvMonthYear = view.findViewById(R.id.tv_month_year)
+        btnPrevMonth = view.findViewById(R.id.btn_prev_month)
+        btnNextMonth = view.findViewById(R.id.btn_next_month)
+
+        NoteManager.addDummyDataIfNeeded()
+
+        // Tampilkan kalender awal berdasarkan bulan berjalan
+        updateCalendarUi()
+
+        // Tombol Panah Kiri (<) untuk kembali ke bulan sebelumnya
+        btnPrevMonth.setOnClickListener {
+            currentCalendar.add(Calendar.MONTH, -1)
+            // Reset tanggal terpilih ke tanggal 1 setiap pindah bulan agar aman
+            selectedDateNumber = 1
+            updateCalendarUi()
+        }
+
+        // Tombol Panah Kanan (>) untuk maju ke bulan berikutnya
+        btnNextMonth.setOnClickListener {
+            currentCalendar.add(Calendar.MONTH, 1)
+            selectedDateNumber = 1
+            updateCalendarUi()
+        }
     }
 
-    private fun setupCalendarGrid(view: View) {
-        val rvCalendarGrid: RecyclerView = view.findViewById(R.id.rv_calendar_grid)
+    // Fungsi pusat untuk memperbarui Teks Judul, Grid Kotak Angka, dan Timeline
+    private fun updateCalendarUi() {
+        // 1. Perbarui teks bulan dan tahun di atas kartu (Contoh: "Mei 2026")
+        val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+        tvMonthYear.text = monthYearFormat.format(currentCalendar.time)
 
-        // Membuat dummy data untuk 35 kotak (5 minggu x 7 hari)
-        // Sebagian kosong (sebelum tanggal 1), sebagian berisi tanggal
-        val dateList = mutableListOf<CalendarDate>()
+        // 2. Gambar ulang kotak grid tanggal kalendernya
+        setupCalendarGrid()
 
-        // Contoh tanggal kosong di awal bulan (misal bulan mulai di hari Selasa)
-        dateList.add(CalendarDate("29"))
-        dateList.add(CalendarDate("30"))
+        // 3. Sinkronkan ulang timeline catatan di bawahnya
+        updateTimelineForDate(selectedDateNumber)
+    }
 
-        // Mengisi tanggal 1 sampai 31
-        for (i in 1..31) {
-            val isSelectedDate = (i == 11) // Anggap hari ini tanggal 11 (Aktif warna magenta)
-            val hasEventDot = (i == 2 || i == 8 || i == 15 || i == 18) // Tanggal-tanggal yang ada titik event
+    private fun setupCalendarGrid() {
+        dateList.clear()
+
+        // Buat tiruan kalender khusus untuk mendeteksi awal hari pada bulan yang aktif
+        val monthCalendar = currentCalendar.clone() as Calendar
+        monthCalendar.set(Calendar.DAY_OF_MONTH, 1)
+
+        val firstDayOfWeek = monthCalendar.get(Calendar.DAY_OF_WEEK)
+
+        // Selipkan kotak kosong transparan agar posisi hari pas
+        val emptySlots = firstDayOfWeek - 1
+        for (i in 0 until emptySlots) {
+            dateList.add(CalendarDate(""))
+        }
+
+        // Mendapatkan batas maksimum hari pada bulan tersebut (misal Februari bisa 28/29)
+        val maxDaysInMonth = currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+        // Isi angka tanggal dari 1 sampai batas akhir bulan
+        for (i in 1..maxDaysInMonth) {
+            val isSelectedDate = (i == selectedDateNumber)
+
+            // Cek titik merah: Tanggal, Bulan, dan Tahun HARUS COCOK
+            val viewMonth = currentCalendar.get(Calendar.MONTH)
+            val viewYear = currentCalendar.get(Calendar.YEAR)
+
+            val hasEventDot = NoteManager.noteList.any {
+                it.dateNumber == i && it.month == viewMonth && it.year == viewYear
+            }
 
             dateList.add(CalendarDate(i.toString(), isSelectedDate, hasEventDot))
         }
 
-        // Layout manager menggunakan Grid 7 kolom
         rvCalendarGrid.layoutManager = GridLayoutManager(requireContext(), 7)
-        rvCalendarGrid.adapter = CalendarDateAdapter(dateList)
+
+        rvCalendarGrid.adapter = CalendarDateAdapter(dateList) { clickedDate ->
+            val dateInt = clickedDate.dateNumber.toIntOrNull()
+            if (dateInt != null) {
+                dateList.forEach { it.isSelected = (it.dateNumber == clickedDate.dateNumber) }
+                rvCalendarGrid.adapter?.notifyDataSetChanged()
+
+                selectedDateNumber = dateInt
+                updateTimelineForDate(dateInt)
+            }
+        }
     }
 
-    private fun setupTimeline(view: View) {
-        val rvTimeline: RecyclerView = view.findViewById(R.id.rv_timeline)
+    private fun updateTimelineForDate(dateNumber: Int) {
+        // Indikator teks kanan bawah timeline otomatis mengikuti singkatan bulan (Contoh: "MEI 13")
+        val monthFormat = SimpleDateFormat("MMM", Locale.getDefault())
+        val monthString = monthFormat.format(currentCalendar.time).uppercase()
+        tvTimelineDate.text = "$monthString $dateNumber"
 
-        // Data dummy untuk event hari ini
-        val eventList = listOf(
+        // Filter Timeline: Tanggal, Bulan, dan Tahun HARUS COCOK
+        val viewMonth = currentCalendar.get(Calendar.MONTH)
+        val viewYear = currentCalendar.get(Calendar.YEAR)
+
+        val filteredNotes = NoteManager.noteList.filter {
+            it.dateNumber == dateNumber && it.month == viewMonth && it.year == viewYear
+        }
+
+        val eventList = filteredNotes.map { note ->
             TimelineEvent(
-                "08:00\nAM",
-                "Morning Meditation & Journal",
-                "Felt particularly grounded today. Focused on gratitude for the small things.",
-                "MINDFULNESS"
-            ),
-            TimelineEvent(
-                "11:30\nAM",
-                "Strategy Session with Creative Team",
-                "Discussed the upcoming Q4 goals and visual direction. Key takeaway: simplicity is luxury.",
-                "WORK  PRIORITY" // Anda bisa memisahkan tag jika diperlukan desain lanjutan
-            ),
-            TimelineEvent(
-                "05:00\nPM",
-                "Grocery List & Meal Prep",
-                "Need to pick up fresh basil, balsamic glaze, and heirloom tomatoes for tonight's salad.",
-                "PERSONAL"
+                time = note.time,
+                title = note.title,
+                description = note.preview,
+                tag = note.category.uppercase()
             )
-        )
+        }
 
-        // Menggunakan LayoutManager Vertikal biasa
         rvTimeline.layoutManager = LinearLayoutManager(requireContext())
         rvTimeline.adapter = TimelineAdapter(eventList)
     }
