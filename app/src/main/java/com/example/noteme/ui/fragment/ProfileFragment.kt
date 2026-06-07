@@ -26,7 +26,9 @@ class ProfileFragment : Fragment() {
     private lateinit var tvUserName: TextView
     private lateinit var tvUserEmail: TextView
     private lateinit var authManager: AuthManager
-    private lateinit var pickImageLauncher: ActivityResultLauncher<String>
+
+    // UBAH: Menggunakan Array<String> untuk tipe mime
+    private lateinit var pickImageLauncher: ActivityResultLauncher<Array<String>>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,9 +39,14 @@ class ProfileFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+
+        // UBAH: Gunakan OpenDocument agar kita bisa menyimpan izin baca secara permanen
+        pickImageLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             uri?.let {
+                // Mengambil izin baca permanen dari sistem Android
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                requireActivity().contentResolver.takePersistableUriPermission(it, takeFlags)
+
                 updateProfileImage(it)
                 saveImageUri(it)
             }
@@ -53,23 +60,29 @@ class ProfileFragment : Fragment() {
         ivProfilePhoto = view.findViewById(R.id.ivProfilePhoto)
         tvUserName = view.findViewById(R.id.tvUserName)
         tvUserEmail = view.findViewById(R.id.tvUserEmail)
-        
+
         setupClickListeners(view)
         setupDarkMode(view)
-        
+
         loadProfileData()
     }
 
     private fun loadProfileData() {
-        // Ambil data dari AuthManager (Data yang diinput saat Register/Login)
+        // Ambil data dari AuthManager
         tvUserName.text = authManager.getUserName()
         tvUserEmail.text = authManager.getUserEmail()
-        
-        // Load Foto Profil dari SharedPreferences UserProfile
+
+        // Load Foto Profil dari SharedPreferences
         val sharedPref = requireActivity().getSharedPreferences("UserProfile", Context.MODE_PRIVATE)
         val imageUriString = sharedPref.getString("profile_image", null)
+
         if (imageUriString != null) {
-            updateProfileImage(Uri.parse(imageUriString))
+            try {
+                updateProfileImage(Uri.parse(imageUriString))
+            } catch (e: Exception) {
+                // Jika file gambar asli terhapus dari galeri pengguna, atasi error-nya di sini
+                e.printStackTrace()
+            }
         }
     }
 
@@ -90,7 +103,8 @@ class ProfileFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.btnEditPhoto).setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            // UBAH: Cara memanggil launcher untuk OpenDocument
+            pickImageLauncher.launch(arrayOf("image/*"))
         }
 
         view.findViewById<View>(R.id.menuPersonalInfo).setOnClickListener {
@@ -99,7 +113,7 @@ class ProfileFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
-        
+
         val menus = listOf(
             R.id.menuSecurity to "Security Settings",
             R.id.menuBackup to "Backup & Sync",
@@ -109,9 +123,12 @@ class ProfileFragment : Fragment() {
             R.id.menuPrivacy to "Privacy Policy",
             R.id.menuAbout to "About NoteMe"
         )
-        
+
         menus.forEach { (id, message) ->
-            view.findViewById<View>(id).setOnClickListener { Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }
+            view.findViewById<View>(id).setOnClickListener {
+                // PERBAIKAN: Gunakan requireContext() agar tidak NullPointerException
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
         }
 
         view.findViewById<View>(R.id.btnLogout).setOnClickListener {
@@ -122,7 +139,7 @@ class ProfileFragment : Fragment() {
     private fun setupDarkMode(view: View) {
         val switchDarkMode = view.findViewById<SwitchCompat>(R.id.switchDarkMode)
         val sharedPref = requireActivity().getSharedPreferences("Settings", Context.MODE_PRIVATE)
-        
+
         val isEnabled = sharedPref.getBoolean("dark_mode", false)
         switchDarkMode.isChecked = isEnabled
 
@@ -141,10 +158,8 @@ class ProfileFragment : Fragment() {
             .setTitle(getString(R.string.logout_confirm_title))
             .setMessage(getString(R.string.logout_confirm_msg))
             .setPositiveButton(getString(R.string.yes)) { _, _ ->
-                // 1. Hapus session login
                 authManager.logout()
-                
-                // 2. Arahkan ke LoginActivity dan bersihkan semua riwayat halaman
+
                 val intent = Intent(requireContext(), LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
