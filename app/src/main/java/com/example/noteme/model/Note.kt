@@ -7,6 +7,8 @@ data class Note(
     val title: String,
     val preview: String,
     val dateNumber: Int = 11,
-    val month: Int = 5, // Tambahkan variabel bulan
-    val year: Int = 2026  // Tambahkan variabel tahun
+    val month: Int = 5,
+    val year: Int = 2026,
+    val tags: List<String> = emptyList(),
+    val ownerEmail: String // Tambahkan ini sebagai tanda pengenal pemilik catatan
 )

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -53,14 +53,12 @@
                 android:clickable="true"
                 android:focusable="true">
 
-                <!-- Lingkaran Background -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@drawable/bg_circle"
                     android:backgroundTint="#FCE4EC" />
 
-                <!-- Foto Profil Sebenarnya -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -78,7 +76,6 @@
                         android:padding="20dp" />
                 </androidx.cardview.widget.CardView>
 
-                <!-- Tombol Pensil -->
                 <ImageView
                     android:layout_width="28dp"
                     android:layout_height="28dp"
@@ -109,14 +106,15 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- Stats Cards -->
+        <!-- Stats Cards (Hanya Notes dan Tags) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:orientation="horizontal"
-            android:weightSum="3">
+            android:weightSum="2">
 
+            <!-- Card Notes -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardNotes"
                 android:layout_width="0dp"
@@ -133,11 +131,12 @@
                     android:padding="16dp"
                     android:orientation="vertical">
                     <TextView
+                        android:id="@+id/tvNotesCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/notes_count"
+                        android:text="0"
                         android:textColor="@color/magenta_noteme"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
@@ -148,37 +147,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardJournals"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="6dp"
-                android:layout_weight="1"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="16dp"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/journals_count"
-                        android:textColor="@color/magenta_noteme"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/journals_label"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
+            <!-- Card Tags -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardTags"
                 android:layout_width="0dp"
@@ -195,11 +164,12 @@
                     android:padding="16dp"
                     android:orientation="vertical">
                     <TextView
+                        android:id="@+id/tvTagsCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/tags_count"
+                        android:text="0"
                         android:textColor="@color/magenta_noteme"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
@@ -569,4 +539,4 @@
             android:alpha="0.5" />
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

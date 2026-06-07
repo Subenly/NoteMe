@@ -11,6 +11,10 @@
     <string name="good_afternoon">Good Afternoon, %1$s</string>
     <string name="good_evening">Good Evening, %1$s</string>
 
+    <!-- Reminders Templates -->
+    <string name="reminders_for_date">Reminders for %1$s</string>
+    <string name="no_reminders">Tidak ada pengingat untuk tanggal ini</string>
+
     <!-- Profile Strings -->
     <string name="profile">Profile</string>
     <string name="user_name">User</string>
@@ -57,16 +61,17 @@
     <!-- Onboarding Strings -->
     <string name="onboarding_title_1">Capture Your Thoughts</string>
     <string name="onboarding_desc_1">Tulis ide, mimpi, dan catatan penting Anda dengan cepat dan mudah.</string>
-
     <string name="onboarding_title_2">Never miss a moment.</string>
     <string name="onboarding_desc_2">Atur jadwal harian Anda dan pastikan semua rencana berjalan sesuai timeline.</string>
-
     <string name="onboarding_title_3">Stay Productive</string>
     <string name="onboarding_desc_3">Dapatkan pengingat otomatis untuk jurnal dan tugas harian Anda.</string>
-
     <string name="get_started">GET STARTED  →</string>
     <string name="finish">FINISH</string>
     <string name="skip">Skip</string>
+
+    <!-- Create Note Strings -->
+    <string name="hint_tags">#Tags (pisahkan dengan koma)</string>
+    <string name="word_count_format">%1$d words</string>
 
     <!-- Auth Strings -->
     <string name="welcome_back">Welcome Back</string>
@@ -76,7 +81,6 @@
     <string name="log_in">Log In  →</string>
     <string name="dont_have_account">Don\'t have an account? </string>
     <string name="sign_up">Sign Up</string>
-
     <string name="create_account">Create Account</string>
     <string name="signup_subtitle">Start your mindful productivity journey today.</string>
     <string name="full_name">Full Name</string>
