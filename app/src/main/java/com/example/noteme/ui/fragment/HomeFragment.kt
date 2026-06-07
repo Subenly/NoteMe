@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteme.R
 import com.example.noteme.model.DateItem
+import com.example.noteme.model.Note
 import com.example.noteme.model.NoteManager
 import com.example.noteme.model.Reminder
 import com.example.noteme.ui.adapter.DateAdapter
@@ -45,7 +46,6 @@ class HomeFragment : Fragment() {
         tvNoReminders = view.findViewById(R.id.tv_no_reminders)
         rvReminders = view.findViewById(R.id.rv_reminders)
 
-        // Muat data dummy hanya jika usernya adalah "User" demo
         NoteManager.addDummyDataIfNeeded(authManager.getUserEmail())
 
         setupLiveDateHeader(view)
@@ -91,8 +91,6 @@ class HomeFragment : Fragment() {
 
     private fun updateRemindersUI() {
         val userEmail = authManager.getUserEmail()
-        
-        // FILTER: Hanya ambil catatan milik user aktif
         val userNotes = NoteManager.noteList.filter { it.ownerEmail == userEmail }
         
         val today = Calendar.getInstance()
@@ -102,35 +100,53 @@ class HomeFragment : Fragment() {
         tvRemindersTitle.text = if (isToday) getString(R.string.today_s_reminders) 
                                else getString(R.string.reminders_for_date, SimpleDateFormat("MMM dd", Locale.getDefault()).format(selectedCalendar.time))
 
-        // Filter berdasarkan tanggal yang dipilih
-        val filteredReminders = userNotes.filter { note ->
+        val filteredNotes = userNotes.filter { note ->
             note.year == selectedCalendar.get(Calendar.YEAR) &&
             note.month == selectedCalendar.get(Calendar.MONTH) &&
             note.dateNumber == selectedCalendar.get(Calendar.DAY_OF_MONTH)
-        }.map { note ->
-            Reminder(R.drawable.ic_notes, note.time, note.title, note.preview)
         }
 
-        if (filteredReminders.isEmpty()) {
+        if (filteredNotes.isEmpty()) {
             rvReminders.visibility = View.GONE
             tvNoReminders.visibility = View.VISIBLE
         } else {
             rvReminders.visibility = View.VISIBLE
             tvNoReminders.visibility = View.GONE
+            
+            val filteredReminders = filteredNotes.map { note ->
+                Reminder(R.drawable.ic_notes, note.time, note.title, note.preview, note.id)
+            }
+
             rvReminders.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-            rvReminders.adapter = ReminderAdapter(filteredReminders)
+            rvReminders.adapter = ReminderAdapter(filteredReminders) { clickedReminder ->
+                val note = NoteManager.noteList.find { it.id == clickedReminder.noteId }
+                note?.let { openNoteView(it) }
+            }
         }
     }
 
     private fun setupRecentNotes(view: View) {
         val rvRecentNotes: RecyclerView = view.findViewById(R.id.rv_recent_notes)
         val userEmail = authManager.getUserEmail()
-        
-        // FILTER: Hanya ambil catatan milik user aktif
         val userNotes = NoteManager.noteList.filter { it.ownerEmail == userEmail }
         
         rvRecentNotes.layoutManager = LinearLayoutManager(requireContext())
-        rvRecentNotes.adapter = NoteAdapter(userNotes)
+        rvRecentNotes.adapter = NoteAdapter(userNotes) { clickedNote ->
+            openNoteView(clickedNote)
+        }
+    }
+
+    private fun openNoteView(note: Note) {
+        // UBAH: Sekarang membuka ViewNoteFragment, bukan CreateNoteFragment
+        val fragment = ViewNoteFragment().apply {
+            arguments = Bundle().apply {
+                putString("note_id", note.id)
+            }
+        }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onResume() {

@@ -8,8 +8,6 @@ import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.noteme.R
-import com.example.noteme.model.NoteManager
-import com.example.noteme.utils.AuthManager
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
@@ -17,46 +15,36 @@ class ReminderWorker(private val context: Context, workerParams: WorkerParameter
     Worker(context, workerParams) {
 
     override fun doWork(): Result {
-        // 1. PENTING: Muat data dari memori HP agar Worker punya daftar catatan terbaru
-        NoteManager.loadNotes(context)
+        // Mengambil data yang dikirim dari CreateNoteFragment
+        val title = inputData.getString("note_title") ?: "Note Reminder"
+        val day = inputData.getInt("note_day", -1)
+        val month = inputData.getInt("note_month", -1)
+        val year = inputData.getInt("note_year", -1)
 
-        // 2. Identifikasi siapa pengguna yang sedang login
-        val authManager = AuthManager(context)
-        val currentUserEmail = authManager.getUserEmail()
+        if (day != -1) {
+            // Waktu Hari Ini (Clean: jam 00:00)
+            val today = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            }
 
-        // 3. Ambil waktu hari ini (set ke jam 00:00 agar perbandingan tanggal akurat)
-        val todayCal = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-
-        // 4. Saring catatan: HANYA milik user aktif
-        val userNotes = NoteManager.noteList.filter { it.ownerEmail == currentUserEmail }
-
-        userNotes.forEach { note ->
-            val noteCal = Calendar.getInstance().apply {
-                set(Calendar.YEAR, note.year)
-                set(Calendar.MONTH, note.month)
-                set(Calendar.DAY_OF_MONTH, note.dateNumber)
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
+            // Waktu Target Agenda (Clean: jam 00:00)
+            val targetDate = Calendar.getInstance().apply {
+                set(year, month, day, 0, 0, 0); set(Calendar.MILLISECOND, 0)
             }
 
             // Hitung selisih hari
-            val diffInMillis = noteCal.timeInMillis - todayCal.timeInMillis
+            val diffInMillis = targetDate.timeInMillis - today.timeInMillis
             val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis)
 
-            // Munculkan notifikasi jika jadwalnya adalah HARI INI
-            if (diffInDays == 0L) {
-                showNotification(
-                    title = "Reminder: ${note.title}",
-                    message = "Jangan lupa! Kamu punya agenda untuk hari ini."
-                )
+            // Tentukan pesan berdasarkan selisih hari
+            val message = when {
+                diffInDays == 0L -> "Ada agenda hari ini!"
+                diffInDays > 0 -> "$diffInDays hari lagi menuju agenda ini."
+                else -> "Agenda ini sudah terlewat."
             }
+
+            showNotification("Reminder: $title", message)
         }
 
         return Result.success()
@@ -64,28 +52,20 @@ class ReminderWorker(private val context: Context, workerParams: WorkerParameter
 
     private fun showNotification(title: String, message: String) {
         val channelId = "noteme_reminder_channel"
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "NoteMe Reminders",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Channel untuk pengingat catatan NoteMe"
-            }
+            val channel = NotificationChannel(channelId, "NoteMe Reminders", NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(channel)
         }
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_notes) // Pastikan ikon ini ada
+            .setSmallIcon(R.drawable.ic_notes)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
-        // Tampilkan notifikasi dengan ID unik
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 }

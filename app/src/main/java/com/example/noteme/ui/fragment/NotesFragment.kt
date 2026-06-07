@@ -12,6 +12,7 @@ import com.example.noteme.ui.adapter.NoteAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.noteme.model.NoteManager
 import com.example.noteme.utils.AuthManager
+import com.example.noteme.model.Note
 
 class NotesFragment : Fragment() {
 
@@ -40,7 +41,22 @@ class NotesFragment : Fragment() {
         val userNotes = NoteManager.noteList.filter { it.ownerEmail == userEmail }
 
         rvAllNotes.layoutManager = LinearLayoutManager(requireContext())
-        rvAllNotes.adapter = NoteAdapter(userNotes)
+        rvAllNotes.adapter = NoteAdapter(userNotes) { clickedNote ->
+            // UBAH: Sekarang membuka ViewNoteFragment, bukan CreateNoteFragment
+            openNoteView(clickedNote)
+        }
+    }
+
+    private fun openNoteView(note: Note) {
+        val fragment = ViewNoteFragment().apply {
+            arguments = Bundle().apply {
+                putString("note_id", note.id)
+            }
+        }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun setupFab(view: View) {
@@ -56,7 +72,7 @@ class NotesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Refresh daftar saat kembali dari halaman tambah catatan
+        // Refresh daftar saat kembali dari halaman tambah/edit catatan
         setupRecyclerView(requireView())
     }
 }

@@ -15,6 +15,11 @@
     <string name="reminders_for_date">Reminders for %1$s</string>
     <string name="no_reminders">Tidak ada pengingat untuk tanggal ini</string>
 
+    <!-- Calendar Timeline -->
+    <string name="timeline_for_today">Timeline for Today</string>
+    <string name="timeline_for_date">Timeline for %1$s</string>
+    <string name="no_notes_for_date">Tidak ada catatan untuk tanggal ini</string>
+
     <!-- Profile Strings -->
     <string name="profile">Profile</string>
     <string name="user_name">User</string>

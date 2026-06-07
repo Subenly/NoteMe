@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteme.R
 import com.example.noteme.model.CalendarDate
+import com.example.noteme.model.Note
 import com.example.noteme.model.NoteManager
 import com.example.noteme.model.TimelineEvent
 import com.example.noteme.ui.adapter.CalendarDateAdapter
@@ -127,7 +128,6 @@ class CalendarFragment : Fragment() {
         val monthString = monthFormat.format(currentCalendar.time).uppercase()
         tvTimelineDate.text = "$monthString $dateNumber"
 
-        // 1. LOGIKA JUDUL DINAMIS
         val today = Calendar.getInstance()
         val isToday = dateNumber == today.get(Calendar.DAY_OF_MONTH) &&
                 currentCalendar.get(Calendar.MONTH) == today.get(Calendar.MONTH) &&
@@ -150,7 +150,6 @@ class CalendarFragment : Fragment() {
             it.ownerEmail == userEmail && it.dateNumber == dateNumber && it.month == viewMonth && it.year == viewYear
         }
 
-        // 2. LOGIKA TAMPILAN KOSONG (EMPTY STATE)
         if (filteredNotes.isEmpty()) {
             rvTimeline.visibility = View.GONE
             tvNoTimeline.visibility = View.VISIBLE
@@ -163,12 +162,29 @@ class CalendarFragment : Fragment() {
                     time = note.time,
                     title = note.title,
                     description = note.preview,
-                    tag = note.category.uppercase()
+                    tag = note.category.uppercase(),
+                    noteId = note.id
                 )
             }
 
             rvTimeline.layoutManager = LinearLayoutManager(requireContext())
-            rvTimeline.adapter = TimelineAdapter(eventList)
+            rvTimeline.adapter = TimelineAdapter(eventList) { clickedEvent ->
+                val note = NoteManager.noteList.find { it.id == clickedEvent.noteId }
+                note?.let { openNoteView(it) }
+            }
         }
+    }
+
+    private fun openNoteView(note: Note) {
+        // SEKARANG MEMBUKA ViewNoteFragment
+        val fragment = ViewNoteFragment().apply {
+            arguments = Bundle().apply {
+                putString("note_id", note.id)
+            }
+        }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -30,11 +31,15 @@ class CreateNoteFragment : Fragment() {
     private lateinit var tvDate: TextView
     private lateinit var tvReminder: TextView
     private lateinit var tvWordCount: TextView
+    private lateinit var tvHeaderTitle: TextView
     private lateinit var etTitle: EditText
     private lateinit var etContent: EditText
     private lateinit var etTags: EditText
+    private lateinit var btnDelete: ImageView
     private lateinit var authManager: AuthManager
+    
     private val calendar = Calendar.getInstance()
+    private var existingNoteId: String? = null // Penanda apakah kita sedang EDIT atau CREATE
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,20 +53,42 @@ class CreateNoteFragment : Fragment() {
 
         authManager = AuthManager(requireContext())
         
+        // 1. Inisialisasi View
         tvDate = view.findViewById(R.id.tv_date)
         tvReminder = view.findViewById(R.id.tv_reminder)
         tvWordCount = view.findViewById(R.id.tv_word_count)
+        tvHeaderTitle = view.findViewById(R.id.tvHeaderTitle)
         etTitle = view.findViewById(R.id.et_note_title)
         etContent = view.findViewById(R.id.et_note_content)
         etTags = view.findViewById(R.id.et_note_tags)
+        btnDelete = view.findViewById(R.id.btnDelete)
         val btnSave = view.findViewById<MaterialButton>(R.id.btn_save_entry)
+        val btnBack = view.findViewById<ImageView>(R.id.btnBack)
 
-        updateDateText()
+        // 2. Cek Mode (Edit atau Create Baru?)
+        existingNoteId = arguments?.getString("note_id")
+        if (existingNoteId != null) {
+            loadExistingNote(existingNoteId!!)
+        } else {
+            updateDateText() // Jika baru, set ke tanggal hari ini
+        }
+
         setupWordCounter()
 
         tvDate.setOnClickListener { showDatePicker() }
         tvReminder.setOnClickListener { showTimePicker() }
+        btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
+        
+        // 3. Logika Hapus
+        btnDelete.setOnClickListener {
+            existingNoteId?.let { id ->
+                NoteManager.deleteNote(id, requireContext())
+                Toast.makeText(requireContext(), "Note deleted", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack()
+            }
+        }
 
+        // 4. Logika Simpan (Create atau Update)
         btnSave.setOnClickListener {
             val titleText = etTitle.text.toString().trim()
             val contentText = etContent.text.toString().trim()
@@ -74,10 +101,9 @@ class CreateNoteFragment : Fragment() {
                     emptyList()
                 }
 
-                val currentUserEmail = authManager.getUserEmail()
                 val displayCategory = if (tagList.isNotEmpty()) tagList[0].replaceFirstChar { it.uppercase() } else "Personal"
 
-                val newNote = Note(
+                val note = Note(
                     category = displayCategory,
                     categoryColorResId = R.color.magenta_noteme,
                     time = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(calendar.time),
@@ -87,42 +113,40 @@ class CreateNoteFragment : Fragment() {
                     month = calendar.get(Calendar.MONTH),
                     year = calendar.get(Calendar.YEAR),
                     tags = tagList,
-                    ownerEmail = currentUserEmail
+                    ownerEmail = authManager.getUserEmail(),
+                    id = existingNoteId ?: UUID.randomUUID().toString() // Pakai ID lama jika Edit
                 )
 
-                NoteManager.noteList.add(0, newNote)
-                NoteManager.saveNotes(requireContext())
+                if (existingNoteId != null) {
+                    NoteManager.updateNote(note, requireContext())
+                } else {
+                    NoteManager.noteList.add(0, note)
+                    NoteManager.saveNotes(requireContext())
+                }
 
-                // --- LOGIKA NOTIFIKASI PINTAR ---
-                scheduleNotification(newNote)
-
-                Toast.makeText(requireContext(), "Note Saved Successfully!", Toast.LENGTH_SHORT).show()
+                triggerDemoNotification(note)
+                Toast.makeText(requireContext(), "Note Saved!", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.popBackStack()
 
             } else {
-                Toast.makeText(requireContext(), "Title and content cannot be empty!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Fill in all fields!", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun scheduleNotification(note: Note) {
-        val now = Calendar.getInstance().timeInMillis
-        val scheduleTime = calendar.timeInMillis
-        val delay = scheduleTime - now
-
-        if (delay > 0) {
-            // Berikan data spesifik catatan ke Worker
-            val data = Data.Builder()
-                .putString("note_title", note.title)
-                .putString("note_owner", note.ownerEmail)
-                .build()
-
-            val reminderRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
-                .setInitialDelay(delay, TimeUnit.MILLISECONDS) // Tunggu sampai waktunya tiba
-                .setInputData(data)
-                .build()
-
-            WorkManager.getInstance(requireContext()).enqueue(reminderRequest)
+    private fun loadExistingNote(id: String) {
+        val note = NoteManager.noteList.find { it.id == id }
+        note?.let {
+            tvHeaderTitle.text = "Edit Entry"
+            btnDelete.visibility = View.VISIBLE
+            etTitle.setText(it.title)
+            etContent.setText(it.preview)
+            etTags.setText(it.tags.joinToString(", "))
+            
+            // Set waktu calendar agar sinkron dengan data lama
+            calendar.set(it.year, it.month, it.dateNumber)
+            updateDateText()
+            updateReminderText()
         }
     }
 
@@ -135,6 +159,21 @@ class CreateNoteFragment : Fragment() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+    }
+
+    private fun triggerDemoNotification(note: Note) {
+        val data = Data.Builder()
+            .putString("note_title", note.title)
+            .putInt("note_day", note.dateNumber)
+            .putInt("note_month", note.month)
+            .putInt("note_year", note.year)
+            .build()
+
+        val reminderRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
+            .setInputData(data)
+            .build()
+
+        WorkManager.getInstance(requireContext()).enqueue(reminderRequest)
     }
 
     private fun showDatePicker() {

@@ -1,5 +1,7 @@
 package com.example.noteme.model
 
+import java.util.UUID
+
 data class Note(
     val category: String,
     val categoryColorResId: Int,
@@ -10,5 +12,6 @@ data class Note(
     val month: Int = 5,
     val year: Int = 2026,
     val tags: List<String> = emptyList(),
-    val ownerEmail: String // Tambahkan ini sebagai tanda pengenal pemilik catatan
+    val ownerEmail: String,
+    val id: String = UUID.randomUUID().toString() // Tambahkan ID unik untuk mempermudah edit & delete
 )

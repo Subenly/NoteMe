@@ -10,7 +10,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.noteme.R
 import com.example.noteme.model.Note
 
-class NoteAdapter(private val noteList: List<Note>) : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
+class NoteAdapter(
+    private val noteList: List<Note>,
+    private val onNoteClickListener: (Note) -> Unit // Fungsi aksi klik
+) : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val dotCategory: View = itemView.findViewById(R.id.dot_category)
@@ -33,10 +36,14 @@ class NoteAdapter(private val noteList: List<Note>) : RecyclerView.Adapter<NoteA
         holder.tvTitle.text = note.title
         holder.tvPreview.text = note.preview
 
-        // Mengubah warna teks kategori dan warna titik/dot sesuai data
         val color = ContextCompat.getColor(holder.itemView.context, note.categoryColorResId)
         holder.tvCategory.setTextColor(color)
         holder.dotCategory.backgroundTintList = ColorStateList.valueOf(color)
+
+        // Tangkap event klik pada seluruh item
+        holder.itemView.setOnClickListener {
+            onNoteClickListener(note)
+        }
     }
 
     override fun getItemCount(): Int = noteList.size

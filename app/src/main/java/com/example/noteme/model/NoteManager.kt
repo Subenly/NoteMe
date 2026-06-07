@@ -11,7 +11,6 @@ object NoteManager {
     private const val PREFS_NAME = "NoteMePrefs"
     private const val KEY_NOTES = "saved_notes"
 
-    // Fungsi untuk menambah data dummy hanya untuk akun demo
     fun addDummyDataIfNeeded(ownerEmail: String) {
         val isDemoUser = ownerEmail == "user@noteme.app"
         val hasDemoNote = noteList.any { it.ownerEmail == "user@noteme.app" }
@@ -28,7 +27,6 @@ object NoteManager {
         }
     }
 
-    // SIMPAN: Simpan semua catatan ke memori HP (Permanen)
     fun saveNotes(context: Context) {
         try {
             val sharedPref = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -36,6 +34,7 @@ object NoteManager {
             
             noteList.forEach { note ->
                 val jsonObject = JSONObject()
+                jsonObject.put("id", note.id)
                 jsonObject.put("cat", note.category)
                 jsonObject.put("col", note.categoryColorResId)
                 jsonObject.put("time", note.time)
@@ -55,7 +54,6 @@ object NoteManager {
         }
     }
 
-    // MUAT: Ambil data dari memori HP saat aplikasi dibuka
     fun loadNotes(context: Context) {
         try {
             val sharedPref = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -71,16 +69,17 @@ object NoteManager {
                     for (j in 0 until tagsJson.length()) tagsList.add(tagsJson.getString(j))
 
                     noteList.add(Note(
-                        obj.getString("cat"),
-                        obj.getInt("col"),
-                        obj.getString("time"),
-                        obj.getString("title"),
-                        obj.getString("prev"),
-                        obj.getInt("date"),
-                        obj.getInt("month"),
-                        obj.getInt("year"),
-                        tagsList,
-                        obj.getString("owner")
+                        category = obj.getString("cat"),
+                        categoryColorResId = obj.getInt("col"),
+                        time = obj.getString("time"),
+                        title = obj.getString("title"),
+                        preview = obj.getString("prev"),
+                        dateNumber = obj.getInt("date"),
+                        month = obj.getInt("month"),
+                        year = obj.getInt("year"),
+                        tags = tagsList,
+                        ownerEmail = obj.getString("owner"),
+                        id = obj.optString("id", java.util.UUID.randomUUID().toString())
                     ))
                 }
             }
@@ -89,7 +88,19 @@ object NoteManager {
         }
     }
 
-    // Hanya bersihkan memori RAM saat logout (Data di HP tetap aman)
+    fun updateNote(updatedNote: Note, context: Context) {
+        val index = noteList.indexOfFirst { it.id == updatedNote.id }
+        if (index != -1) {
+            noteList[index] = updatedNote
+            saveNotes(context)
+        }
+    }
+
+    fun deleteNote(noteId: String, context: Context) {
+        noteList.removeAll { it.id == noteId }
+        saveNotes(context)
+    }
+
     fun clearInMemoryNotes() {
         noteList.clear()
     }
