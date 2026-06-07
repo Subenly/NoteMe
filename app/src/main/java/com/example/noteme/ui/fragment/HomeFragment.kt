@@ -18,8 +18,13 @@ import com.example.noteme.ui.adapter.ReminderAdapter
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.example.noteme.model.UserManager
+import com.example.noteme.utils.AuthManager
 
 class HomeFragment : Fragment() {
+
+    private lateinit var tvGreeting: TextView
+    private lateinit var authManager: AuthManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,6 +36,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        authManager = AuthManager(requireContext()) // Inisialisasi AuthManager
+        tvGreeting = view.findViewById(R.id.tv_greeting)
+
+        // Setup komponen lainnya...
         setupLiveDateHeader(view)
         setupHorizontalCalendar(view)
         setupReminders(view)
@@ -158,5 +167,27 @@ class HomeFragment : Fragment() {
         NoteManager.addDummyDataIfNeeded()
         rvRecentNotes.layoutManager = LinearLayoutManager(requireContext())
         rvRecentNotes.adapter = NoteAdapter(NoteManager.noteList)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setupGreeting()
+    }
+
+    private fun setupGreeting() {
+        val calendar = Calendar.getInstance()
+        val timeOfDay = calendar.get(Calendar.HOUR_OF_DAY)
+
+        val greetingWord = when (timeOfDay) {
+            in 0..11 -> "Good Morning"
+            in 12..17 -> "Good Afternoon"
+            in 18..20 -> "Good Evening"
+            else -> "Good Night"
+        }
+
+        // AMBIL NAMA LANGSUNG DARI AuthManager
+        val userName = authManager.getUserName()
+
+        tvGreeting.text = "$greetingWord, $userName"
     }
 }
