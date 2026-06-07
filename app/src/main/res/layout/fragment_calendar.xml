@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:background="@color/bg_screen">
 
     <include
         android:id="@+id/header_calendar"
@@ -37,7 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="October 2024"
-                    android:textColor="#212121"
+                    android:textColor="@color/text_primary"
                     android:textSize="22sp"
                     android:textStyle="bold"
                     android:layout_centerVertical="true"/>
@@ -57,7 +57,7 @@
                         android:gravity="center"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="#757575"
+                        android:textColor="@color/text_secondary"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
                         android:focusable="true"/>
@@ -70,7 +70,7 @@
                         android:gravity="center"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="#757575"
+                        android:textColor="@color/text_secondary"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
                         android:focusable="true"/>
@@ -82,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/bg_card"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp">
@@ -100,13 +100,13 @@
                         android:weightSum="7"
                         android:layout_marginBottom="8dp">
 
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="S" android:gravity="center" android:textColor="#9E9E9E" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="M" android:gravity="center" android:textColor="#9E9E9E" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="T" android:gravity="center" android:textColor="#9E9E9E" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="W" android:gravity="center" android:textColor="#9E9E9E" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="T" android:gravity="center" android:textColor="#9E9E9E" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="F" android:gravity="center" android:textColor="#9E9E9E" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="S" android:gravity="center" android:textColor="#9E9E9E" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="S" android:gravity="center" android:textColor="@color/text_secondary" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="M" android:gravity="center" android:textColor="@color/text_secondary" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="T" android:gravity="center" android:textColor="@color/text_secondary" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="W" android:gravity="center" android:textColor="@color/text_secondary" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="T" android:gravity="center" android:textColor="@color/text_secondary" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="F" android:gravity="center" android:textColor="@color/text_secondary" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="S" android:gravity="center" android:textColor="@color/text_secondary" android:textSize="12sp"/>
                     </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
@@ -125,10 +125,11 @@
                 android:layout_marginTop="32dp">
 
                 <TextView
+                    android:id="@+id/tv_timeline_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Timeline for Today"
-                    android:textColor="#212121"
+                    android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"/>
@@ -145,13 +146,28 @@
                     android:layout_centerVertical="true"/>
             </RelativeLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_timeline"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginHorizontal="20dp"
-                android:overScrollMode="never" />
+                android:layout_marginHorizontal="20dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_timeline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:overScrollMode="never" />
+
+                <TextView
+                    android:id="@+id/tv_no_timeline"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:text="Tidak ada catatan untuk tanggal ini"
+                    android:gravity="center"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:visibility="gone"/>
+            </FrameLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

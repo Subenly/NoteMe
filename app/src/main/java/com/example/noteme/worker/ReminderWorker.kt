@@ -9,6 +9,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.noteme.R
 import com.example.noteme.model.NoteManager
+import com.example.noteme.utils.AuthManager
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
@@ -16,7 +17,14 @@ class ReminderWorker(private val context: Context, workerParams: WorkerParameter
     Worker(context, workerParams) {
 
     override fun doWork(): Result {
-        // Ambil waktu hari ini dan set jam ke 00:00 agar perhitungan hari akurat
+        // 1. PENTING: Muat data dari memori HP agar Worker punya daftar catatan terbaru
+        NoteManager.loadNotes(context)
+
+        // 2. Identifikasi siapa pengguna yang sedang login
+        val authManager = AuthManager(context)
+        val currentUserEmail = authManager.getUserEmail()
+
+        // 3. Ambil waktu hari ini (set ke jam 00:00 agar perbandingan tanggal akurat)
         val todayCal = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
@@ -24,8 +32,10 @@ class ReminderWorker(private val context: Context, workerParams: WorkerParameter
             set(Calendar.MILLISECOND, 0)
         }
 
-        // Cek semua catatan yang ada di NoteManager
-        NoteManager.noteList.forEach { note ->
+        // 4. Saring catatan: HANYA milik user aktif
+        val userNotes = NoteManager.noteList.filter { it.ownerEmail == currentUserEmail }
+
+        userNotes.forEach { note ->
             val noteCal = Calendar.getInstance().apply {
                 set(Calendar.YEAR, note.year)
                 set(Calendar.MONTH, note.month)
@@ -40,11 +50,11 @@ class ReminderWorker(private val context: Context, workerParams: WorkerParameter
             val diffInMillis = noteCal.timeInMillis - todayCal.timeInMillis
             val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis)
 
-            // --- KODE TES: Munculkan notifikasi jika catatan untuk hari ini atau ke depan ---
-            if (diffInDays >= 0L) {
+            // Munculkan notifikasi jika jadwalnya adalah HARI INI
+            if (diffInDays == 0L) {
                 showNotification(
-                    title = "Test Reminder: ${note.title}",
-                    message = "Notifikasi berfungsi! Sisa waktu: $diffInDays hari."
+                    title = "Reminder: ${note.title}",
+                    message = "Jangan lupa! Kamu punya agenda untuk hari ini."
                 )
             }
         }
@@ -57,7 +67,6 @@ class ReminderWorker(private val context: Context, workerParams: WorkerParameter
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Untuk Android 8.0 (Oreo) ke atas, wajib membuat Notification Channel
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
@@ -69,15 +78,14 @@ class ReminderWorker(private val context: Context, workerParams: WorkerParameter
             notificationManager.createNotificationChannel(channel)
         }
 
-        // Desain bentuk notifikasinya
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Ganti dengan ikon aplikasi Anda (misal R.drawable.ic_notes)
+            .setSmallIcon(R.drawable.ic_notes) // Pastikan ikon ini ada
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
-        // Munculkan notifikasi dengan ID unik (menggunakan waktu agar tidak saling menimpa)
+        // Tampilkan notifikasi dengan ID unik
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 }

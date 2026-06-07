@@ -17,11 +17,13 @@ import com.example.noteme.model.Note
 import com.example.noteme.model.NoteManager
 import com.example.noteme.utils.AuthManager
 import com.google.android.material.button.MaterialButton
+import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.noteme.worker.ReminderWorker
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class CreateNoteFragment : Fragment() {
 
@@ -73,7 +75,6 @@ class CreateNoteFragment : Fragment() {
                 }
 
                 val currentUserEmail = authManager.getUserEmail()
-
                 val displayCategory = if (tagList.isNotEmpty()) tagList[0].replaceFirstChar { it.uppercase() } else "Personal"
 
                 val newNote = Note(
@@ -89,14 +90,11 @@ class CreateNoteFragment : Fragment() {
                     ownerEmail = currentUserEmail
                 )
 
-                // Tambahkan catatan
                 NoteManager.noteList.add(0, newNote)
-                
-                // SIMPAN PERMANEN KE MEMORI HP
                 NoteManager.saveNotes(requireContext())
 
-                val checkNowRequest = OneTimeWorkRequestBuilder<ReminderWorker>().build()
-                WorkManager.getInstance(requireContext()).enqueue(checkNowRequest)
+                // --- LOGIKA NOTIFIKASI PINTAR ---
+                scheduleNotification(newNote)
 
                 Toast.makeText(requireContext(), "Note Saved Successfully!", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.popBackStack()
@@ -107,17 +105,33 @@ class CreateNoteFragment : Fragment() {
         }
     }
 
+    private fun scheduleNotification(note: Note) {
+        val now = Calendar.getInstance().timeInMillis
+        val scheduleTime = calendar.timeInMillis
+        val delay = scheduleTime - now
+
+        if (delay > 0) {
+            // Berikan data spesifik catatan ke Worker
+            val data = Data.Builder()
+                .putString("note_title", note.title)
+                .putString("note_owner", note.ownerEmail)
+                .build()
+
+            val reminderRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
+                .setInitialDelay(delay, TimeUnit.MILLISECONDS) // Tunggu sampai waktunya tiba
+                .setInputData(data)
+                .build()
+
+            WorkManager.getInstance(requireContext()).enqueue(reminderRequest)
+        }
+    }
+
     private fun setupWordCounter() {
         etContent.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val text = s?.toString()?.trim()
-                if (text.isNullOrEmpty()) {
-                    tvWordCount.text = "0 words"
-                } else {
-                    val words = text.split("\\s+".toRegex())
-                    tvWordCount.text = "${words.size} words"
-                }
+                tvWordCount.text = if (text.isNullOrEmpty()) "0 words" else "${text.split("\\s+".toRegex()).size} words"
             }
             override fun afterTextChanged(s: Editable?) {}
         })
@@ -132,7 +146,7 @@ class CreateNoteFragment : Fragment() {
 
     private fun showTimePicker() {
         TimePickerDialog(requireContext(), { _, h, min ->
-            calendar.set(Calendar.HOUR_OF_DAY, h); calendar.set(Calendar.MINUTE, min)
+            calendar.set(Calendar.HOUR_OF_DAY, h); calendar.set(Calendar.MINUTE, min); calendar.set(Calendar.SECOND, 0)
             updateReminderText()
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
     }

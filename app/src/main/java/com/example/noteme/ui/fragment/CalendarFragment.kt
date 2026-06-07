@@ -25,6 +25,8 @@ class CalendarFragment : Fragment() {
     private lateinit var rvCalendarGrid: RecyclerView
     private lateinit var rvTimeline: RecyclerView
     private lateinit var tvTimelineDate: TextView
+    private lateinit var tvTimelineTitle: TextView
+    private lateinit var tvNoTimeline: TextView
     private lateinit var tvMonthYear: TextView
     private lateinit var btnPrevMonth: TextView
     private lateinit var btnNextMonth: TextView
@@ -49,11 +51,12 @@ class CalendarFragment : Fragment() {
         rvCalendarGrid = view.findViewById(R.id.rv_calendar_grid)
         rvTimeline = view.findViewById(R.id.rv_timeline)
         tvTimelineDate = view.findViewById(R.id.tv_timeline_date)
+        tvTimelineTitle = view.findViewById(R.id.tv_timeline_title)
+        tvNoTimeline = view.findViewById(R.id.tv_no_timeline)
         tvMonthYear = view.findViewById(R.id.tv_month_year)
         btnPrevMonth = view.findViewById(R.id.btn_prev_month)
         btnNextMonth = view.findViewById(R.id.btn_next_month)
 
-        // Pastikan data dummy muncul hanya untuk akun demo
         NoteManager.addDummyDataIfNeeded(authManager.getUserEmail())
 
         updateCalendarUi()
@@ -93,8 +96,6 @@ class CalendarFragment : Fragment() {
         }
 
         val maxDaysInMonth = currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-        
-        // 1. FILTER: Ambil hanya catatan milik user aktif
         val userNotes = NoteManager.noteList.filter { it.ownerEmail == userEmail }
 
         for (i in 1..maxDaysInMonth) {
@@ -102,7 +103,6 @@ class CalendarFragment : Fragment() {
             val viewMonth = currentCalendar.get(Calendar.MONTH)
             val viewYear = currentCalendar.get(Calendar.YEAR)
 
-            // Cek titik merah hanya pada catatan milik user aktif
             val hasEventDot = userNotes.any {
                 it.dateNumber == i && it.month == viewMonth && it.year == viewYear
             }
@@ -127,25 +127,48 @@ class CalendarFragment : Fragment() {
         val monthString = monthFormat.format(currentCalendar.time).uppercase()
         tvTimelineDate.text = "$monthString $dateNumber"
 
+        // 1. LOGIKA JUDUL DINAMIS
+        val today = Calendar.getInstance()
+        val isToday = dateNumber == today.get(Calendar.DAY_OF_MONTH) &&
+                currentCalendar.get(Calendar.MONTH) == today.get(Calendar.MONTH) &&
+                currentCalendar.get(Calendar.YEAR) == today.get(Calendar.YEAR)
+
+        if (isToday) {
+            tvTimelineTitle.text = "Timeline for Today"
+        } else {
+            val fullDateFormat = SimpleDateFormat("dd MMMM", Locale.getDefault())
+            val tempCal = currentCalendar.clone() as Calendar
+            tempCal.set(Calendar.DAY_OF_MONTH, dateNumber)
+            tvTimelineTitle.text = "Timeline for ${fullDateFormat.format(tempCal.time)}"
+        }
+
         val userEmail = authManager.getUserEmail()
         val viewMonth = currentCalendar.get(Calendar.MONTH)
         val viewYear = currentCalendar.get(Calendar.YEAR)
 
-        // 2. FILTER: Ambil Timeline hanya milik user aktif
         val filteredNotes = NoteManager.noteList.filter {
             it.ownerEmail == userEmail && it.dateNumber == dateNumber && it.month == viewMonth && it.year == viewYear
         }
 
-        val eventList = filteredNotes.map { note ->
-            TimelineEvent(
-                time = note.time,
-                title = note.title,
-                description = note.preview,
-                tag = note.category.uppercase()
-            )
-        }
+        // 2. LOGIKA TAMPILAN KOSONG (EMPTY STATE)
+        if (filteredNotes.isEmpty()) {
+            rvTimeline.visibility = View.GONE
+            tvNoTimeline.visibility = View.VISIBLE
+        } else {
+            rvTimeline.visibility = View.VISIBLE
+            tvNoTimeline.visibility = View.GONE
 
-        rvTimeline.layoutManager = LinearLayoutManager(requireContext())
-        rvTimeline.adapter = TimelineAdapter(eventList)
+            val eventList = filteredNotes.map { note ->
+                TimelineEvent(
+                    time = note.time,
+                    title = note.title,
+                    description = note.preview,
+                    tag = note.category.uppercase()
+                )
+            }
+
+            rvTimeline.layoutManager = LinearLayoutManager(requireContext())
+            rvTimeline.adapter = TimelineAdapter(eventList)
+        }
     }
 }
