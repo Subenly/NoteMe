@@ -16,6 +16,9 @@ import java.util.Calendar
 import java.util.Locale
 import com.example.noteme.model.NoteManager
 import com.example.noteme.model.Note
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.noteme.worker.ReminderWorker
 
 class CreateNoteFragment : Fragment() {
 
@@ -47,15 +50,11 @@ class CreateNoteFragment : Fragment() {
         tvDate.setOnClickListener { showDatePicker() }
         tvReminder.setOnClickListener { showTimePicker() }
 
-        // --- LOGIKA MENYIMPAN CATATAN BARU ---
-        // --- LOGIKA MENYIMPAN CATATAN BARU ---
         btnSave.setOnClickListener {
             val titleText = etTitle.text.toString().trim()
             val contentText = etContent.text.toString().trim()
 
             if (titleText.isNotEmpty() && contentText.isNotEmpty()) {
-
-                // Ambil Tanggal, Bulan, dan Tahun dari Date Picker
                 val selectedDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
                 val selectedMonth = calendar.get(Calendar.MONTH)
                 val selectedYear = calendar.get(Calendar.YEAR)
@@ -67,11 +66,14 @@ class CreateNoteFragment : Fragment() {
                     title = titleText,
                     preview = contentText,
                     dateNumber = selectedDayOfMonth,
-                    month = selectedMonth, // SIMPAN BULAN
-                    year = selectedYear    // SIMPAN TAHUN
+                    month = selectedMonth,
+                    year = selectedYear
                 )
 
                 NoteManager.noteList.add(0, newNote)
+
+                val checkNowRequest = OneTimeWorkRequestBuilder<ReminderWorker>().build()
+                WorkManager.getInstance(requireContext()).enqueue(checkNowRequest)
 
                 Toast.makeText(requireContext(), "Catatan berhasil disimpan!", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.popBackStack()
@@ -130,8 +132,5 @@ class CreateNoteFragment : Fragment() {
     private fun updateReminderText() {
         val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
         tvReminder.text = "⏰ ${format.format(calendar.time)}"
-
-        // Opsional: Anda bisa memberikan warna magenta agar terlihat tombol telah diaktifkan
-        // tvReminder.setTextColor(ContextCompat.getColor(requireContext(), R.color.magenta_noteme))
     }
 }
