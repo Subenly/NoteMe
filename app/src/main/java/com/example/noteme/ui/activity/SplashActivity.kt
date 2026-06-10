@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.example.noteme.R
+import com.example.noteme.model.NoteManager
 import com.example.noteme.utils.AuthManager
 
 @SuppressLint("CustomSplashScreen")
@@ -16,15 +17,16 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
 
         val authManager = AuthManager(this)
+        
+        // PENTING: Muat catatan dari memori HP ke dalam NoteManager saat app mulai
+        NoteManager.loadNotes(this)
+
         val splashTimeOut = 2000L
 
         Handler(Looper.getMainLooper()).postDelayed({
-            // Cek status login
             if (authManager.isLoggedIn()) {
-                // Jika sudah login, langsung ke halaman Utama
                 startActivity(Intent(this, MainActivity::class.java))
             } else {
-                // Jika belum, ke Onboarding
                 startActivity(Intent(this, OnboardingActivity::class.java))
             }
             finish()

@@ -5,12 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteme.R
 import com.example.noteme.model.Reminder
 
-class ReminderAdapter(private val reminderList: List<Reminder>) : RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>() {
+class ReminderAdapter(
+    private val reminderList: List<Reminder>,
+    private val onReminderClickListener: (Reminder) -> Unit // Tambahkan listener
+) : RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>() {
 
     class ReminderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imgIcon: ImageView = itemView.findViewById(R.id.img_reminder_icon)
@@ -30,6 +32,10 @@ class ReminderAdapter(private val reminderList: List<Reminder>) : RecyclerView.A
         holder.tvTime.text = reminder.time
         holder.tvTitle.text = reminder.title
         holder.tvDesc.text = reminder.description
+
+        holder.itemView.setOnClickListener {
+            onReminderClickListener(reminder)
+        }
     }
 
     override fun getItemCount(): Int = reminderList.size

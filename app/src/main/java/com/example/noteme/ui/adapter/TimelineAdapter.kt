@@ -8,7 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.noteme.R
 import com.example.noteme.model.TimelineEvent
 
-class TimelineAdapter(private val eventList: List<TimelineEvent>) : RecyclerView.Adapter<TimelineAdapter.TimelineViewHolder>() {
+class TimelineAdapter(
+    private val eventList: List<TimelineEvent>,
+    private val onEventClickListener: (TimelineEvent) -> Unit
+) : RecyclerView.Adapter<TimelineAdapter.TimelineViewHolder>() {
 
     class TimelineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTime: TextView = itemView.findViewById(R.id.tv_event_time)
@@ -28,6 +31,10 @@ class TimelineAdapter(private val eventList: List<TimelineEvent>) : RecyclerView
         holder.tvTitle.text = event.title
         holder.tvDesc.text = event.description
         holder.tvTag.text = event.tag
+
+        holder.itemView.setOnClickListener {
+            onEventClickListener(event)
+        }
     }
 
     override fun getItemCount(): Int = eventList.size
